@@ -1,26 +1,37 @@
 <html>
 <script>
-    const WEB_SOCKET_URL = 'ws://127.0.0.1:34534'
-    const ws = new WebSocket(WEB_SOCKET_URL);
+    const WEB_SOCKET_URL = "ws://127.0.0.1:34534"
 
-    ws.onclose = (event) => {
-        console.log('close', { code: event.code, reason: event.reason });
-    };
-    ws.onopen = () => {
-        console.log('WebSocket Connected:');
-    };
-    ws.onmessage = (ev) => {
-        console.log(ev.data);
-        const ul = document.getElementById('list')
-        const li = document.createElement('li');
-        li.appendChild(document.createTextNode(ev.data));
-        ul.appendChild(li);
-    };
+    const ws_listen = () => {
+        const ws = new WebSocket(WEB_SOCKET_URL);
+
+        ws.onclose = (event) => {
+            console.log("close Reconnect will be attempted in 1 second.", { code: event.code, reason: event.reason });
+            setTimeout(() => {
+                ws_listen();
+            }, 1000);
+        };
+        ws.onerror = (err) => {
+            console.error("Socket encountered error: ", err.message, "Closing socket");
+            ws.close();
+        };
+        ws.onopen = () => {
+            console.log("WebSocket Connected:");
+        };
+        ws.onmessage = (ev) => {
+            console.log(ev.data);
+            const ul = document.getElementById("list")
+            const li = document.createElement("li");
+            li.appendChild(document.createTextNode(ev.data));
+            ul.appendChild(li);
+        };
+    }
+    ws_listen()
 </script>
 
 <body>
     <ul id="list">
-
+        <!-- the messages will be added as a li here -->
     </ul>
 </body>
 
