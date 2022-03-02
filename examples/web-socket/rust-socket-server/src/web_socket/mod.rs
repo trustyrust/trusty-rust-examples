@@ -29,9 +29,9 @@ async fn handle_connection(map: MapSubscribe, raw_stream: TcpStream, addr: Socke
 
     println!("ws connected: {}", &addr);
     let ws_stream = tokio_tungstenite::accept_async(raw_stream).await.expect("Error during the websocket handshake occurred");
-    let (mut outgoing, _) = ws_stream.split();
+    let (mut outgoing, mut incoming) = ws_stream.split();
 
-    if let Err(e) = ws_open_sockets::on_connection(&mut outgoing, map, addr).await {
+    if let Err(e) = ws_open_sockets::on_connection(&mut outgoing, &mut incoming, map, addr).await {
         println!("Error on WebSocket {}: {}", addr, e);
         // Send error message to client
         outgoing.send(Message::Text(format!("Error: {}", e))).await.expect("Failed to close");
